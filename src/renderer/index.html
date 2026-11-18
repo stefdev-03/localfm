@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' media: blob: data:; media-src media:"
+    />
+    <title>Local.fm</title>
+    <link rel="stylesheet" href="styles/app.css" />
+    <script src="js/theme.js"></script>
+  </head>
+  <body>
+    <header id="titlebar">
+      <span class="titlebar-mark" aria-hidden="true"></span>
+      <span class="titlebar-name">Local.fm</span>
+      <!-- Filled by the main window with the profile button; empty during setup. -->
+      <div id="titlebar-actions"></div>
+    </header>
+    <main id="screen"></main>
+    <div id="modal-root"></div>
+    <div id="menu-root"></div>
+    <div id="toast-root" role="status" aria-live="polite"></div>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

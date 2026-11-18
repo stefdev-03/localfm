@@ -1,0 +1,56 @@
+# --- Secrets and credentials ------------------------------------------------
+# Never commit these. Code signing and publishing credentials in particular.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+*.cer
+*.spc
+*.jks
+*.keystore
+.npmrc
+.yarnrc
+electron-builder.env
+credentials*.json
+secrets*.json
+
+# --- Personal app data --------------------------------------------------------
+# Local.fm keeps profiles, playlists, library caches and pictures in %APPDATA%,
+# but these guard against a copy ending up in the project (e.g. via
+# LOCALFM_USER_DATA).
+data.json
+data.json.tmp
+data.json.corrupt-*
+library-*.json
+art-lookups.json
+art/
+images/
+
+# --- Local editor and assistant settings --------------------------------------
+# Machine-specific; may contain local paths and permissions.
+.claude/
+.impeccable/
+.vscode/
+.idea/
+*.code-workspace
+
+# --- Dependencies and build output --------------------------------------------
+node_modules/
+dist/
+out/
+
+# --- Generated test files -----------------------------------------------------
+# Recreate with: npm run make-test-library
+test-library/
+tests/e2e/output/
+
+# --- Logs and OS clutter -------------------------------------------------------
+*.log
+npm-debug.log*
+Thumbs.db
+desktop.ini
+.DS_Store

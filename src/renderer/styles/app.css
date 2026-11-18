@@ -1,0 +1,2581 @@
+/* Local.fm — Windows Media Player-style interface. Dark unless the light theme
+   is switched on in Settings. Every colour that differs between the two is a
+   variable here, so the rules below never mention a theme.
+   --profile-color is set from the profile in use; --accent is derived from it. */
+
+:root {
+  --profile-color: #ffb454;
+  --bg: #202020;
+  --card: #272727;
+  --raised: #2e2e2e;
+  --popup: #2c2c2c;
+  --toast: #333;
+  --tile: #3a3a3a; /* a cover or picture slot with nothing in it yet */
+  --tile-ink: rgba(255, 255, 255, 0.72);
+  --well: rgba(0, 0, 0, 0.14); /* sunken lists and previews */
+  --fill: rgba(255, 255, 255, 0.06);
+  --fill-hover: rgba(255, 255, 255, 0.09);
+  --fill-press: rgba(255, 255, 255, 0.04);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --faint: rgba(255, 255, 255, 0.22);
+  --track: rgba(255, 255, 255, 0.14);
+  --track-strong: rgba(255, 255, 255, 0.3);
+  --thumb-ring: #454545;
+  --field-edge: rgba(255, 255, 255, 0.54);
+  --field-focus: rgba(0, 0, 0, 0.28);
+  --disabled-ink: rgba(255, 255, 255, 0.36);
+  --disabled-fill: rgba(255, 255, 255, 0.04);
+  --disabled-accent: rgba(255, 255, 255, 0.16);
+  --disabled-accent-ink: rgba(255, 255, 255, 0.5);
+  --scroll: rgba(255, 255, 255, 0.22);
+  --scroll-hover: rgba(255, 255, 255, 0.4);
+  --text: #f6f6f6;
+  --text-2: #c8c8c8;
+  --text-3: #9d9d9d;
+  --accent: var(--profile-color);
+  --accent-ink: #141414;
+  --swatch-ink: #141414; /* on a profile's own colour, which is the same in both themes */
+  --danger: #ff99a4;
+  --danger-ink: #1f0a0d;
+  --warn: #ffd27a;
+  --notice-line: rgba(255, 200, 80, 0.22);
+  --notice-bg: rgba(255, 200, 80, 0.08);
+  --scrim: rgba(0, 0, 0, 0.5);
+  --shadow-k: 1; /* how heavy drop shadows are */
+  --search-clear: invert(1) brightness(1.4);
+  /* The cover wall behind "Who's listening?": a veil in the page colour, denser
+     behind the profiles so the text holds up over any cover. */
+  --wall-veil: rgba(32, 32, 32, 0.66);
+  --wall-veil-dense: rgba(32, 32, 32, 0.86);
+  --wall-saturate: 0.8;
+  --radius: 5px;
+  --radius-lg: 8px;
+  --titlebar: 40px;
+  --font: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+/* Light theme. The profile colours are pastels made to sit on dark grey, so
+   here the accent is the same hue taken down to a depth that reads on white,
+   and things drawn on it turn white. */
+:root[data-theme='light'] {
+  --bg: #f1f1f1;
+  --card: #fbfbfb;
+  --raised: #ffffff;
+  --popup: #fdfdfd;
+  --toast: #ffffff;
+  --tile: #e2e2e2;
+  --tile-ink: rgba(0, 0, 0, 0.5);
+  --well: rgba(0, 0, 0, 0.035);
+  --fill: rgba(0, 0, 0, 0.045);
+  --fill-hover: rgba(0, 0, 0, 0.08);
+  --fill-press: rgba(0, 0, 0, 0.03);
+  --line: rgba(0, 0, 0, 0.1);
+  --line-strong: rgba(0, 0, 0, 0.2);
+  --faint: rgba(0, 0, 0, 0.22);
+  --track: rgba(0, 0, 0, 0.12);
+  --track-strong: rgba(0, 0, 0, 0.26);
+  --thumb-ring: #ffffff;
+  --field-edge: rgba(0, 0, 0, 0.45);
+  --field-focus: #ffffff;
+  --disabled-ink: rgba(0, 0, 0, 0.36);
+  --disabled-fill: rgba(0, 0, 0, 0.03);
+  --disabled-accent: rgba(0, 0, 0, 0.2);
+  --disabled-accent-ink: #ffffff;
+  --scroll: rgba(0, 0, 0, 0.28);
+  --scroll-hover: rgba(0, 0, 0, 0.46);
+  --text: #1a1a1a;
+  --text-2: #454545;
+  --text-3: #676767;
+  --accent: oklch(from var(--profile-color) 0.52 c h);
+  --accent-ink: #ffffff;
+  --danger: #c42b1c;
+  --danger-ink: #ffffff;
+  --warn: #8a5a00;
+  --notice-line: rgba(170, 110, 0, 0.3);
+  --notice-bg: rgba(255, 190, 60, 0.16);
+  --scrim: rgba(0, 0, 0, 0.32);
+  --shadow-k: 0.36;
+  --search-clear: none;
+  --wall-veil: rgba(241, 241, 241, 0.82);
+  --wall-veil-dense: rgba(241, 241, 241, 0.94);
+  --wall-saturate: 1;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: grid;
+  grid-template-rows: var(--titlebar) minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font: 14px/1.4 var(--font);
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font: 600 28px/1.2 var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font: 600 20px/1.3 var(--font-display);
+}
+
+h3 {
+  font: 600 16px/1.3 var(--font-display);
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: default;
+}
+
+img {
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scroll);
+  border: 4px solid transparent;
+  border-radius: 6px;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scroll-hover);
+}
+
+.icon {
+  flex: none;
+  display: block;
+}
+.spacer {
+  flex: 1;
+}
+.muted {
+  color: var(--text-3);
+}
+.ellipsis {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.eyebrow {
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- title bar ---------------------------------------------------------- */
+
+#titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  color: var(--text-2);
+  font-size: 12px;
+  -webkit-app-region: drag;
+}
+.titlebar-mark {
+  width: 16px;
+  height: 16px;
+  background: url('../assets/icon.svg') center / contain no-repeat;
+}
+/* Sits against the minimise / maximise / close buttons, which Windows draws
+   over the right end of the title bar (about 138px when the size is unknown). */
+#titlebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  margin-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, calc(100vw - 138px)) - 8px);
+  -webkit-app-region: no-drag;
+}
+.profile-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  transition: background-color 0.12s, transform 0.12s;
+}
+.profile-btn:hover,
+.profile-btn[aria-expanded='true'] {
+  background: var(--fill-hover);
+}
+.profile-btn:hover .avatar {
+  transform: scale(1.06);
+}
+.profile-btn:active .avatar {
+  transform: scale(0.96);
+}
+.profile-btn .avatar {
+  transition: transform 0.12s;
+}
+/* While a menu is open the title bar takes clicks, so one there closes the
+   menu instead of starting to drag the window. */
+body:has(#menu-root > .menu) #titlebar {
+  -webkit-app-region: no-drag;
+}
+.titlebar-slot {
+  display: contents;
+}
+
+#screen {
+  min-height: 0;
+}
+
+/* ---- buttons and fields ------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--fill);
+  white-space: nowrap;
+  transition: background-color 0.12s;
+}
+.btn:hover {
+  background: var(--fill-hover);
+}
+.btn:active {
+  background: var(--fill-press);
+  color: var(--text-2);
+}
+.btn:disabled {
+  color: var(--disabled-ink);
+  background: var(--disabled-fill);
+  pointer-events: none;
+}
+.btn-accent {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.btn-accent:hover {
+  background: color-mix(in srgb, var(--accent) 90%, #000);
+}
+.btn-accent:active {
+  background: color-mix(in srgb, var(--accent) 80%, #000);
+  color: var(--accent-ink);
+}
+.btn-accent:disabled {
+  background: var(--disabled-accent);
+  color: var(--disabled-accent-ink);
+}
+.btn-danger {
+  border-color: transparent;
+  background: var(--danger);
+  color: var(--danger-ink);
+  font-weight: 600;
+}
+.btn-danger:hover {
+  background: color-mix(in srgb, var(--danger) 90%, #000);
+}
+.btn-quiet-danger {
+  border-color: transparent;
+  background: transparent;
+  color: var(--danger);
+}
+.btn-square {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  background: var(--fill);
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-2);
+  transition: background-color 0.12s;
+}
+.icon-btn:hover {
+  background: var(--fill-hover);
+  color: var(--text);
+}
+.icon-btn:disabled {
+  color: var(--disabled-ink);
+  pointer-events: none;
+}
+
+.input,
+.select {
+  height: 32px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-bottom-color: var(--field-edge);
+  border-radius: var(--radius);
+  background: var(--fill);
+  outline: none;
+  user-select: text;
+}
+.input::placeholder {
+  color: var(--text-3);
+}
+.input:hover,
+.select:hover {
+  background: var(--fill-hover);
+}
+.input:focus {
+  background: var(--field-focus);
+  border-bottom: 2px solid var(--accent);
+}
+.select:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+.select option {
+  background: var(--popup);
+}
+.input-lg {
+  width: 100%;
+  height: 40px;
+  font-size: 16px;
+}
+.input.is-invalid {
+  border-bottom-color: var(--danger);
+}
+.input[type='search']::-webkit-search-cancel-button {
+  filter: var(--search-clear);
+}
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search .icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-3);
+  pointer-events: none;
+}
+.search .input {
+  width: 220px;
+  padding-left: 32px;
+}
+
+/* Range slider; --fill is the filled share of the track. */
+.slider {
+  --fill: 0%;
+  appearance: none;
+  flex: 1;
+  min-width: 0;
+  height: 20px;
+  margin: 0;
+  background: transparent;
+}
+.slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--accent) var(--fill), var(--track-strong) var(--fill));
+}
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -7px;
+  border: 4px solid var(--thumb-ring);
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+  transition: border-width 0.1s;
+}
+.slider:hover::-webkit-slider-thumb {
+  border-width: 3px;
+}
+.slider:disabled::-webkit-slider-thumb {
+  visibility: hidden;
+}
+.slider:disabled::-webkit-slider-runnable-track {
+  background: var(--track);
+}
+
+.switch {
+  appearance: none;
+  flex: none;
+  position: relative;
+  width: 40px;
+  height: 20px;
+  margin: 0;
+  border: 1px solid var(--text-2);
+  border-radius: 10px;
+  background: transparent;
+  transition: background-color 0.12s;
+}
+.switch::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-2);
+  transition: transform 0.12s;
+}
+.switch:checked {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.switch:checked::before {
+  background: var(--accent-ink);
+  transform: translateX(20px);
+}
+
+/* ---- covers and avatars ------------------------------------------------- */
+
+.cover {
+  display: grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--tile);
+  color: var(--tile-ink);
+}
+/* A song with no art gets a tinted tile of its own, dark in both themes. */
+.cover.is-tinted {
+  color: rgba(255, 255, 255, 0.72);
+}
+.cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cover-sm {
+  width: 40px;
+  height: 40px;
+}
+.cover-xs {
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+}
+.cover-xs .icon {
+  width: 14px;
+  height: 14px;
+}
+/* Playlist pictures in the sidebar. */
+.cover-nav {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+}
+.cover-nav .icon {
+  width: 20px;
+  height: 20px;
+}
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  border-radius: 50%;
+  color: var(--swatch-ink);
+  font-weight: 700;
+  line-height: 1;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar-xs {
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+}
+.avatar-sm {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+.avatar-md {
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+}
+.avatar-lg {
+  width: 72px;
+  height: 72px;
+  font-size: 30px;
+}
+.avatar-xl {
+  width: 104px;
+  height: 104px;
+  font-size: 42px;
+}
+
+/* ---- main shell --------------------------------------------------------- */
+
+.shell {
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  height: 100%;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+  padding: 4px 8px 8px;
+}
+.sidebar-nav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+}
+.nav-playlists {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  margin-right: -8px;
+  padding-right: 8px;
+  overflow-y: auto;
+}
+.sidebar-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
+.nav-heading {
+  padding: 18px 12px 6px;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 12px;
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  transition: background-color 0.12s;
+}
+.nav-item:hover {
+  background: var(--fill);
+}
+.nav-item.is-active {
+  background: var(--fill-hover);
+}
+.nav-item.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.nav-item > .icon:first-child {
+  margin: 0 3px;
+  color: var(--text-2);
+}
+.nav-plus {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 3px;
+  color: var(--text-2);
+}
+/* Playlist rows (and "Create playlist") are taller, with a bigger picture
+   and the song count under the name. */
+.nav-item-lg {
+  height: 56px;
+  padding: 0 8px;
+}
+.nav-item-lg.is-active::before {
+  top: 16px;
+  bottom: 16px;
+}
+.nav-item-lg .nav-label {
+  font-weight: 600;
+}
+.nav-item-lg .nav-plus {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+}
+.nav-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.nav-sub {
+  color: var(--text-3);
+  font-size: 12px;
+}
+.nav-item .nav-label {
+  min-width: 0;
+}
+.nav-eq {
+  margin-left: auto;
+}
+.eq.is-paused i {
+  animation-play-state: paused;
+}
+
+.content {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: var(--radius-lg) 0 0 0;
+  background: var(--card);
+}
+
+/* ---- pages -------------------------------------------------------------- */
+
+.view,
+.view-scroller {
+  height: 100%;
+}
+.view-scroller {
+  overflow-y: auto;
+  padding-bottom: 16px;
+}
+.view-head {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 26px 28px 16px;
+}
+.view-sub {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+  color: var(--text-3);
+}
+.view-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.scan-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+}
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--track);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.notices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 28px;
+}
+.notices:not(:empty) {
+  padding-bottom: 12px;
+}
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--notice-line);
+  border-radius: var(--radius);
+  background: var(--notice-bg);
+  color: var(--text-2);
+  user-select: text;
+}
+.notice > .icon {
+  color: var(--warn);
+}
+.notice > span {
+  flex: 1;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 64px 28px;
+  color: var(--text-3);
+  text-align: center;
+}
+.empty h2 {
+  color: var(--text);
+}
+.empty .btn {
+  margin-top: 8px;
+}
+.empty-compact {
+  padding: 40px 20px;
+}
+
+/* ---- song list ---------------------------------------------------------- */
+
+.list-head,
+.song-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 2.2fr) minmax(0, 1.4fr) minmax(0, 1.4fr) 56px 32px;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px;
+}
+.list-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 34px;
+  margin: 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+  color: var(--text-3);
+  font-size: 12px;
+}
+.col-time {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.vlist {
+  position: relative;
+  margin: 4px 16px 0;
+}
+.vlist > * {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+.song-row {
+  border-radius: var(--radius);
+  transition: background-color 0.1s;
+}
+.song-row:hover,
+.song-row:focus-within {
+  background: var(--fill);
+}
+.song-row.is-current {
+  background: var(--fill);
+}
+.song-play {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+}
+.song-play-icon {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.58);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.song-row:hover .song-play-icon,
+.song-play:focus-visible .song-play-icon {
+  opacity: 1;
+}
+.song-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-weight: 500;
+}
+.song-row.is-current .song-title {
+  color: var(--accent);
+}
+.song-artist,
+.song-album,
+.song-time {
+  color: var(--text-2);
+}
+.song-time {
+  color: var(--text-3);
+}
+.song-action {
+  color: var(--text-3);
+}
+.song-row:hover .song-action {
+  color: var(--text);
+}
+
+/* Dragging a song to a new place in a playlist. The other rows slide aside to
+   open a gap where it would land; the gap is the only indicator. */
+.vlist.is-dragging > .song-row {
+  transition: transform 0.12s;
+}
+.song-row.is-drag-source > * {
+  visibility: hidden;
+}
+.song-row.is-lifted {
+  z-index: 3;
+  background: var(--raised);
+  box-shadow: 0 12px 32px rgb(0 0 0 / calc(0.45 * var(--shadow-k)));
+  cursor: grabbing;
+  transition: none;
+  pointer-events: none;
+}
+/* The place the song would take, since playlist rows are not numbered. */
+.drag-pos {
+  position: absolute;
+  top: 6px;
+  left: 4px;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+body.is-row-dragging,
+body.is-row-dragging * {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+/* Little equaliser shown next to the song that is playing. */
+.eq {
+  display: inline-flex;
+  align-items: flex-end;
+  flex: none;
+  gap: 2px;
+  width: 14px;
+  height: 14px;
+}
+.eq i {
+  flex: 1;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--accent);
+  transform-origin: bottom;
+  animation: eq 0.9s ease-in-out infinite;
+}
+.eq i:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.eq i:nth-child(3) {
+  animation-delay: -0.6s;
+}
+@keyframes eq {
+  0%,
+  100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* ---- playlist page ------------------------------------------------------ */
+
+.pl-banner {
+  aspect-ratio: 2560 / 423;
+  width: 100%;
+  background: var(--tile);
+}
+.pl-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pl-banner.is-empty {
+  aspect-ratio: auto;
+  height: 96px;
+  background: linear-gradient(110deg, color-mix(in srgb, var(--accent) 42%, var(--card)), var(--raised) 72%);
+}
+.pl-info {
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+  padding: 16px 28px 20px;
+}
+.pl-tile {
+  width: 152px;
+  height: 152px;
+  margin-top: -64px;
+  border: 4px solid var(--card);
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+}
+.pl-tile .icon {
+  width: 48px;
+  height: 48px;
+}
+.pl-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.pl-text .view-actions {
+  margin-top: 14px;
+}
+
+/* ---- albums ------------------------------------------------------------- */
+
+/* Always five across; the page scrolls down through as many rows as needed.
+   Past 1500px the grid stops growing, and its search and sort stop with it. */
+.grid-head {
+  max-width: calc(1500px + 56px);
+}
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 28px 20px;
+  max-width: calc(1500px + 56px);
+  padding: 4px 28px 12px;
+}
+.album-tile {
+  position: relative;
+  min-width: 0;
+  container-type: inline-size;
+}
+.album-open {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  text-align: left;
+}
+.album-tile-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 6px;
+}
+/* A 1px line inside the cover, so a white cover keeps its edge on a light page. */
+.album-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--line);
+  pointer-events: none;
+}
+.album-cover.is-tinted .icon {
+  width: 33%;
+  height: auto;
+}
+.album-title {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.album-detail {
+  margin-top: 1px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.album-play {
+  position: absolute;
+  top: calc(100cqw - 44px);
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0 0 0 2px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 2px 6px rgb(0 0 0 / calc(0.3 * var(--shadow-k)));
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+.album-tile:hover .album-play,
+.album-tile:focus-within .album-play,
+.artist-tile:hover .album-play,
+.artist-tile:focus-within .album-play {
+  opacity: 1;
+}
+.album-play:hover {
+  background: color-mix(in srgb, var(--accent) 90%, #fff);
+}
+
+/* An album's (later an artist's) own page. */
+.detail-hero {
+  padding: 18px 28px 20px;
+}
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  margin: 0 0 14px -8px;
+  padding: 0 10px 0 8px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-2);
+  transition: background-color 0.12s;
+}
+.back-btn:hover {
+  background: var(--fill);
+  color: var(--text);
+}
+.detail-info {
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+}
+.detail-cover {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+}
+
+/* A link inside a line of facts, such as the artist on an album's page. */
+.text-link {
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--text-2);
+}
+.text-link:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+/* ---- artists ------------------------------------------------------------ */
+
+.artist-tile {
+  position: relative;
+  min-width: 0;
+  container-type: inline-size;
+}
+.artist-open {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  text-align: center;
+}
+/* Always a circle, with the initial sized to it. */
+.artist-pic {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--tile);
+  container-type: inline-size;
+}
+.artist-pic::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--line);
+  pointer-events: none;
+}
+.artist-pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Dark in both themes, like a song's tinted cover. */
+.artist-pic.is-tinted {
+  color: rgba(255, 255, 255, 0.82);
+}
+.artist-initial {
+  font-family: var(--font-display);
+  font-size: 38cqw;
+  font-weight: 600;
+  line-height: 1;
+}
+.artist-name {
+  max-width: 100%;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.artist-count {
+  margin-top: 1px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.detail-artist-pic {
+  width: 168px;
+  box-shadow: 0 8px 20px rgb(0 0 0 / calc(0.35 * var(--shadow-k)));
+}
+
+/* Plain text tabs with an accent underline, as Windows 11 draws them. */
+.tabs {
+  display: flex;
+  gap: 24px;
+  margin: 0 28px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.tab {
+  position: relative;
+  padding: 8px 0 10px;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  font-weight: 500;
+  transition: color 0.12s;
+}
+.tab:hover {
+  color: var(--text);
+}
+.tab.is-selected {
+  color: var(--text);
+}
+.tab.is-selected::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+}
+
+/* Song lists without an Album column show the track number in its place. */
+.list-head.no-album,
+.song-row.no-album {
+  grid-template-columns: 40px minmax(0, 2.2fr) minmax(0, 1.4fr) 56px 32px;
+}
+.col-number {
+  text-align: center;
+}
+.song-play.is-number {
+  display: grid;
+  place-items: center;
+}
+.song-number {
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  transition: opacity 0.1s;
+}
+.song-row.is-current .song-number {
+  color: var(--accent);
+}
+.song-play.is-number .song-play-icon {
+  background: none;
+  color: var(--text);
+}
+.song-row:hover .song-number,
+.song-play.is-number:focus-visible .song-number {
+  opacity: 0;
+}
+
+/* ---- player bar --------------------------------------------------------- */
+
+.playerbar {
+  grid-column: 1 / -1;
+  padding: 8px 16px 12px;
+  border-top: 1px solid var(--line);
+  background: var(--bg);
+}
+.pb-seek {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pb-time {
+  width: 44px;
+  color: var(--text-3);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.pb-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  margin-top: 6px;
+}
+.pb-now {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.pb-cover {
+  width: 56px;
+  height: 56px;
+}
+.pb-cover.is-idle {
+  background: var(--raised) !important;
+  color: var(--text-3);
+}
+.pb-text {
+  min-width: 0;
+}
+.pb-title {
+  font-weight: 600;
+}
+.pb-artist {
+  color: var(--text-3);
+  font-size: 13px;
+}
+.pb-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pb-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.pb-btn.is-on {
+  color: var(--accent);
+}
+.pb-btn.is-on::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.pb-play {
+  width: 48px;
+  height: 48px;
+  margin: 0 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  transition: transform 0.1s, background-color 0.12s;
+}
+.pb-play:hover {
+  background: color-mix(in srgb, var(--accent) 90%, #fff);
+  color: var(--accent-ink);
+  transform: scale(1.04);
+}
+.pb-play:active {
+  transform: scale(0.97);
+}
+.pb-extra {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.pb-volume {
+  flex: none;
+  width: 120px;
+}
+
+/* ---- setup wizard ------------------------------------------------------- */
+
+.wizard {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 8px 24px 32px;
+  overflow-y: auto;
+}
+.picker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 8px 24px 64px;
+  overflow-y: auto;
+  text-align: center;
+}
+.wizard-card {
+  display: flex;
+  flex-direction: column;
+  width: min(760px, 100%);
+  padding: 28px 32px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+.wizard-steps,
+.pe-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.wizard-steps {
+  margin-bottom: 26px;
+}
+.wizard-step,
+.pe-step-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Between two steps: three small notes climbing towards the next one. They
+   stay quiet: dim ahead of you, accent-coloured behind you, and only the run
+   leading out of the current step moves, one note after another. */
+.step-notes {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 8px 0 6px;
+  color: var(--faint);
+}
+.step-notes .icon {
+  stroke-width: 2.4;
+}
+.step-notes .icon:nth-child(1) {
+  translate: 0 3px;
+}
+.step-notes .icon:nth-child(3) {
+  translate: 0 -3px;
+}
+.wizard-step.is-done .step-notes,
+.pe-step.is-done .step-notes {
+  color: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.wizard-step.is-active .step-notes,
+.pe-step.is-active .step-notes {
+  color: var(--text-3);
+}
+.wizard-step.is-active .step-notes .icon,
+.pe-step.is-active .step-notes .icon {
+  animation: note-step 3.2s ease-in-out infinite;
+}
+.wizard-step.is-active .step-notes .icon:nth-child(2),
+.pe-step.is-active .step-notes .icon:nth-child(2) {
+  animation-delay: 0.22s;
+}
+.wizard-step.is-active .step-notes .icon:nth-child(3),
+.pe-step.is-active .step-notes .icon:nth-child(3) {
+  animation-delay: 0.44s;
+}
+@keyframes note-step {
+  0%,
+  45%,
+  100% {
+    opacity: 0.55;
+    transform: none;
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-1.5px);
+  }
+}
+.pe-step {
+  display: flex;
+  align-items: center;
+}
+.wizard-step-num,
+.pe-step-num {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+}
+.wizard-step.is-active,
+.pe-step.is-active {
+  color: var(--text);
+  font-weight: 600;
+}
+.wizard-step.is-active .wizard-step-num,
+.pe-step.is-active .pe-step-num {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.wizard-step.is-done .wizard-step-num,
+.pe-step.is-done .pe-step-num {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.wizard-body {
+  display: flex;
+  flex-direction: column;
+}
+.wizard-title {
+  margin-top: 4px;
+}
+.wizard-lead {
+  max-width: 62ch;
+  margin: 10px 0 22px;
+  font-size: 15px;
+}
+.wizard-foot,
+.pe-foot,
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.folder-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--fill);
+}
+.folder-box > .icon {
+  color: var(--accent);
+}
+.folder-box-text {
+  flex: 1;
+  min-width: 0;
+}
+.folder-box-label {
+  font-weight: 600;
+}
+.folder-box-path {
+  overflow: hidden;
+  color: var(--text-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: text;
+}
+
+.progress-block {
+  margin-top: 20px;
+}
+.progress-label {
+  margin-bottom: 8px;
+  color: var(--text-2);
+}
+.progress {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--track);
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.15s;
+}
+
+.wizard-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-weight: 600;
+}
+.wizard-result > .icon {
+  color: var(--accent);
+}
+.wizard-result.is-inline {
+  margin: -4px 0 22px;
+}
+.wizard-result-note {
+  color: var(--text-3);
+  font-weight: 400;
+}
+.wizard-preview {
+  height: 232px;
+  margin-top: 10px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--well);
+}
+.wizard-preview .vlist {
+  margin: 0;
+}
+.preview-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px;
+}
+.preview-title {
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.preview-artist {
+  overflow: hidden;
+  color: var(--text-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.choice-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--fill);
+  text-align: left;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.choice:hover {
+  background: var(--fill-hover);
+  border-color: var(--line-strong);
+}
+.choice > .icon {
+  margin-bottom: 8px;
+  color: var(--text-2);
+}
+.choice.is-primary {
+  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.choice.is-primary > .icon {
+  color: var(--accent);
+}
+.choice-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+.choice-sub {
+  color: var(--text-3);
+}
+
+.profile-form {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.profile-form-fields {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.field-label {
+  margin-bottom: -4px;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+.swatches {
+  display: flex;
+  gap: 10px;
+}
+.swatch {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: var(--swatch-ink);
+}
+.swatch.is-selected {
+  box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--text);
+}
+
+/* The avatar in the profile form doubles as a button for choosing a profile
+   picture. A pencil fades in over it on hover and on keyboard focus. */
+.avatar-edit {
+  position: relative;
+  flex: none;
+}
+.avatar-edit-btn {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.avatar-edit-btn .avatar {
+  display: grid;
+  transition: color 0.14s;
+}
+/* The initial steps aside so the pencil is not drawn on top of a letter. */
+.avatar-edit-btn:hover .avatar,
+.avatar-edit-btn:focus-visible .avatar {
+  color: transparent;
+}
+.avatar-edit-hover {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.52);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.14s;
+}
+.avatar-edit-hover .icon {
+  transform: translateY(3px) rotate(-8deg);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.avatar-edit-btn:hover .avatar-edit-hover,
+.avatar-edit-btn:focus-visible .avatar-edit-hover {
+  opacity: 1;
+}
+.avatar-edit-btn:hover .avatar-edit-hover .icon,
+.avatar-edit-btn:focus-visible .avatar-edit-hover .icon {
+  transform: none;
+}
+.avatar-edit-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--popup);
+  border-radius: 50%;
+  background: var(--raised);
+  color: var(--text-2);
+  opacity: 0;
+  transition: opacity 0.12s, background-color 0.12s;
+}
+.wizard-card .avatar-edit-remove {
+  border-color: var(--card);
+}
+.avatar-edit:hover .avatar-edit-remove,
+.avatar-edit:focus-within .avatar-edit-remove {
+  opacity: 1;
+}
+.avatar-edit-remove:hover {
+  background: var(--danger);
+  color: var(--danger-ink);
+}
+.form-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 14px;
+  color: var(--danger);
+  font-size: 13px;
+  user-select: text;
+}
+.form-error .icon {
+  margin-top: 1px;
+}
+
+/* ---- profile picker ----------------------------------------------------- */
+
+/* The wall stays inside the screen area: under the title bar, Windows draws
+   its window buttons on a solid block that would sit on top of it. */
+#screen:has(> .picker-wall) {
+  position: relative;
+}
+.picker-wall {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.wall {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.6s ease-out;
+}
+.wall.is-ready {
+  opacity: 1;
+}
+/* Built at a quarter of its size and scaled up 4x (see coverWall.js), so 3px
+   of blur here is 12px as seen. */
+.wall-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  justify-content: center;
+  gap: var(--wall-gap);
+  filter: blur(3px) saturate(var(--wall-saturate));
+}
+.wall-col {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--wall-gap);
+  width: var(--wall-tile);
+  /* The column holds its tiles twice; moving it by exactly half loops it. */
+  padding-bottom: var(--wall-gap);
+  animation: wall-up linear infinite;
+  will-change: transform;
+}
+.wall-col.is-down {
+  animation-name: wall-down;
+}
+.wall.is-paused .wall-col {
+  animation-play-state: paused;
+}
+.wall-tile {
+  flex: none;
+  width: var(--wall-tile);
+  height: var(--wall-tile);
+  overflow: hidden;
+  border-radius: var(--wall-radius);
+  background: var(--tile);
+}
+.wall-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.wall-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 46% 42% at 50% 47%, var(--wall-veil-dense) 0%, var(--wall-veil-dense) 55%, var(--wall-veil) 100%);
+}
+/* Meets the title bar without a line. */
+.wall-fade {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 48px;
+  background: linear-gradient(var(--bg), transparent);
+}
+@keyframes wall-up {
+  to {
+    transform: translateY(-50%);
+  }
+}
+@keyframes wall-down {
+  from {
+    transform: translateY(-50%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.picker-title {
+  font: 600 32px/1.2 var(--font-display);
+}
+.picker-sub {
+  margin-top: 8px;
+  color: var(--text-2);
+}
+.picker-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  max-width: 760px;
+  margin-top: 36px;
+}
+.profile-tile-wrap {
+  position: relative;
+  --ring: var(--profile-ring, var(--text-2));
+}
+/* On the light theme the profile's pastel is taken down to a depth that shows. */
+:root[data-theme='light'] .profile-tile-wrap {
+  --ring: oklch(from var(--profile-ring, #454545) 0.52 c h);
+}
+.profile-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 168px;
+  padding: 12px 12px 8px;
+  border: 0;
+  background: transparent;
+}
+.profile-tile:focus-visible {
+  outline: none;
+}
+.profile-tile .avatar {
+  width: 120px;
+  height: 120px;
+  font-size: 48px;
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / calc(0.4 * var(--shadow-k)));
+  transition: outline-color 0.12s, transform 0.12s;
+}
+.profile-tile:hover .avatar,
+.profile-tile:focus-visible .avatar {
+  outline-color: var(--ring);
+  transform: scale(1.03);
+}
+.profile-tile-name {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.avatar-add {
+  border: 1px dashed var(--line-strong);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  color: var(--text-2);
+}
+.profile-tile.is-add .avatar {
+  box-shadow: none;
+}
+/* Top right of the picture. */
+.profile-tile-edit {
+  position: absolute;
+  top: 8px;
+  left: calc(50% + 34px);
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: var(--raised);
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.profile-tile-edit:hover {
+  background: var(--raised);
+}
+.profile-tile-wrap:hover .profile-tile-edit,
+.profile-tile-edit:focus-visible {
+  opacity: 1;
+}
+
+/* ---- playlist editor ---------------------------------------------------- */
+
+.pe {
+  display: flex;
+  flex-direction: column;
+}
+.pe-steps {
+  margin-bottom: 22px;
+}
+.pe-step-btn {
+  padding: 4px 6px 4px 4px;
+}
+.pe-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 150px;
+}
+.pe-body .input-lg {
+  margin-top: 8px;
+}
+.pe-preview {
+  margin: 8px 0 6px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--well);
+}
+.pe-preview-banner {
+  aspect-ratio: 2560 / 423;
+  background: var(--tile);
+}
+.pe-preview-banner.is-empty {
+  background: linear-gradient(110deg, color-mix(in srgb, var(--accent) 42%, var(--card)), var(--raised) 72%);
+}
+.pe-preview-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pe-preview-info {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 0 18px 14px;
+}
+.pe-preview-tile {
+  width: 88px;
+  height: 88px;
+  margin-top: -36px;
+  border: 3px solid var(--card);
+  border-radius: 8px;
+}
+.pe-preview-name {
+  overflow: hidden;
+  padding-bottom: 6px;
+  font: 600 20px/1.2 var(--font-display);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pe-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.pe-field-text {
+  flex: 1;
+  min-width: 0;
+}
+.pe-field-title {
+  font-weight: 600;
+}
+.pe-songs-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.pe-count {
+  color: var(--accent);
+  font-weight: 600;
+}
+.pe-songs-tools {
+  display: flex;
+  gap: 8px;
+}
+.pe-songs-tools .search {
+  flex: 1;
+}
+.pe-songs-tools .search .input {
+  width: 100%;
+}
+.pe-songs {
+  height: min(42vh, 380px);
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--well);
+}
+.pe-songs .vlist {
+  margin: 0;
+}
+.pick-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 52px 32px;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px;
+}
+.pick-row:hover {
+  background: var(--fill);
+}
+.pick-row.is-added {
+  background: color-mix(in srgb, var(--accent) 11%, transparent);
+}
+.pick-title,
+.pick-artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pick-title {
+  font-weight: 500;
+}
+.pick-artist {
+  color: var(--text-3);
+  font-size: 13px;
+}
+.pick-time {
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.pick-btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: transparent;
+  transition: background-color 0.12s, border-color 0.12s;
+}
+.pick-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.pick-btn.is-added {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.pick-btn.is-added:hover {
+  background: color-mix(in srgb, var(--accent) 86%, #000);
+  color: var(--accent-ink);
+}
+
+/* ---- playlist "Edit details" dialog -------------------------------------- */
+
+.pd {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.pd-slot {
+  position: relative;
+  flex: none;
+}
+.pd-slot-banner {
+  aspect-ratio: 2560 / 423;
+}
+.pd-slot-image {
+  width: 168px;
+  height: 168px;
+}
+.pd-pic {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--tile);
+  box-shadow: 0 6px 18px rgb(0 0 0 / calc(0.32 * var(--shadow-k)));
+  color: var(--text-2);
+  cursor: pointer;
+}
+.pd-pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pd-pic.is-empty {
+  border: 1px dashed var(--line-strong);
+  background: var(--fill);
+  box-shadow: none;
+  transition: background-color 0.12s, border-color 0.12s, color 0.12s;
+}
+.pd-pic.is-empty:hover,
+.pd-pic.is-empty:focus-visible {
+  border-color: var(--accent);
+  background: var(--fill-hover);
+  color: var(--text);
+}
+.pd-pic-empty,
+.pd-pic-hover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+}
+.pd-slot-image .pd-pic-empty,
+.pd-slot-image .pd-pic-hover {
+  flex-direction: column;
+}
+.pd-pic-hover {
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.pd-slot:hover .pd-pic-hover,
+.pd-pic:focus-visible .pd-pic-hover {
+  opacity: 1;
+}
+.pd-remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.66);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.12s, background-color 0.12s;
+}
+.pd-slot:hover .pd-remove,
+.pd-slot:focus-within .pd-remove {
+  opacity: 1;
+}
+.pd-remove:hover {
+  background: var(--danger);
+  color: var(--danger-ink);
+}
+.pd-row {
+  display: flex;
+  gap: 20px;
+}
+.pd-fields {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.pd-fields .field-label {
+  margin-bottom: -2px;
+}
+.pd-hint {
+  margin-top: 4px;
+  font-size: 13px;
+}
+.pd .modal-actions {
+  margin-top: 4px;
+}
+
+/* ---- dialogs, menus, toasts --------------------------------------------- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: calc(var(--titlebar) + 8px) 24px 24px;
+  background: var(--scrim);
+  animation: fade 0.12s ease-out;
+}
+.modal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--popup);
+  box-shadow: 0 24px 60px rgb(0 0 0 / calc(0.5 * var(--shadow-k)));
+  animation: rise 0.16s ease-out;
+}
+.modal-sm {
+  max-width: 440px;
+}
+.modal-md {
+  max-width: 580px;
+}
+.modal-lg {
+  max-width: 800px;
+}
+.modal-xl {
+  max-width: 820px;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 32px;
+  padding: 20px 20px 0 24px;
+}
+.modal-head h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.modal-body {
+  min-height: 0;
+  padding: 16px 24px 24px;
+  overflow-y: auto;
+}
+.modal-text {
+  color: var(--text-2);
+  user-select: text;
+}
+.modal-actions {
+  justify-content: flex-end;
+}
+
+.crop-stage {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  margin: 16px auto 0;
+  border-radius: var(--radius);
+  background: #161616;
+  cursor: grab;
+  touch-action: none;
+}
+.crop-stage.is-dragging {
+  cursor: grabbing;
+}
+.crop-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 14px;
+}
+.crop-hint {
+  color: var(--text-3);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 22px;
+}
+.settings-section + .settings-section {
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.settings-folders {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.folder-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--fill);
+}
+.folder-row > .icon {
+  color: var(--text-2);
+}
+.folder-row-text {
+  flex: 1;
+  min-width: 0;
+  user-select: text;
+}
+.folder-row-warn {
+  color: var(--warn);
+  font-size: 12px;
+}
+.settings-row {
+  display: flex;
+  gap: 8px;
+}
+.switch-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.switch-row > span {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+.switch-title {
+  font-weight: 600;
+}
+.settings-about {
+  font-size: 12px;
+}
+
+.menu {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+  max-width: 320px;
+  max-height: min(420px, calc(100vh - 16px));
+  padding: 4px;
+  overflow-y: auto;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--popup);
+  box-shadow: 0 12px 32px rgb(0 0 0 / calc(0.45 * var(--shadow-k)));
+  animation: fade 0.1s ease-out;
+}
+/* Drop-down menus unroll downwards from the button that opened them, and
+   their rows follow a beat behind. */
+.menu.is-dropdown {
+  animation: drop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.menu.is-dropdown > * {
+  animation: drop-item 0.26s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+.menu.is-dropdown > :nth-child(2) {
+  animation-delay: 0.02s;
+}
+.menu.is-dropdown > :nth-child(3) {
+  animation-delay: 0.04s;
+}
+.menu.is-dropdown > :nth-child(4) {
+  animation-delay: 0.06s;
+}
+.menu.is-dropdown > :nth-child(n + 5) {
+  animation-delay: 0.08s;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 12px;
+  height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  text-align: left;
+}
+.menu-item:hover,
+.menu-item:focus-visible {
+  background: var(--fill-hover);
+  outline: none;
+}
+.menu-item.is-danger {
+  color: var(--danger);
+}
+.menu-item > .icon:first-child {
+  margin: 0 4px;
+  color: var(--text-2);
+}
+.menu-item.is-danger > .icon:first-child {
+  color: inherit;
+}
+.menu-gap {
+  width: 24px;
+}
+.menu-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menu-heading {
+  padding: 8px 10px 4px;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+.menu-sep {
+  flex: none;
+  height: 1px;
+  margin: 4px 0;
+  background: var(--line);
+}
+
+#toast-root {
+  position: fixed;
+  bottom: 132px;
+  left: 50%;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 560px;
+  padding: 10px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: var(--toast);
+  box-shadow: 0 8px 24px rgb(0 0 0 / calc(0.4 * var(--shadow-k)));
+  pointer-events: auto;
+  animation: rise 0.16s ease-out;
+}
+.toast-action {
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--accent);
+  font-weight: 600;
+}
+.toast-action:hover {
+  text-decoration: underline;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes drop {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 100% 0 round 8px);
+    transform: translateY(-6px);
+  }
+  to {
+    /* Negative insets leave room for the shadow once the menu is fully open. */
+    clip-path: inset(-40px -40px -40px -40px round 8px);
+  }
+}
+@keyframes drop-item {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ---- narrow windows ----------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .shell {
+    grid-template-columns: 232px minmax(0, 1fr);
+  }
+  .list-head,
+  .song-row {
+    grid-template-columns: 40px minmax(0, 2fr) minmax(0, 1.3fr) 56px 32px;
+  }
+  .col-album {
+    display: none;
+  }
+  .search .input {
+    width: 180px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .eq i {
+    transform: scaleY(0.7);
+  }
+  /* The wall stays, standing still. */
+  .wall-col {
+    animation: none;
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "localfm",
+  "productName": "Local.fm",
+  "version": "0.1.0",
+  "description": "A local MP3 and FLAC player for your own music library, with playlists and profiles.",
+  "author": "Local.fm",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "node scripts/run-electron.mjs .",
+    "test": "node --test \"tests/unit/*.test.js\"",
+    "test:e2e": "node tests/e2e/smoke.mjs",
+    "test:edge": "node tests/e2e/edge.mjs",
+    "test:appearance": "node tests/e2e/appearance.mjs",
+    "test:sidebar": "node tests/e2e/sidebar.mjs",
+    "test:library": "node tests/e2e/library.mjs",
+    "test:reorder": "node tests/e2e/reorder.mjs",
+    "make-test-library": "node scripts/make-test-library.mjs",
+    "make-icon": "node scripts/run-electron.mjs scripts/make-icon.mjs",
+    "pack": "electron-builder --win dir",
+    "dist": "electron-builder --win nsis",
+    "test:picker": "node tests/e2e/picker.mjs"
+  },
+  "build": {
+    "appId": "com.localfm.player",
+    "productName": "Local.fm",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "shortcutName": "Local.fm"
+    }
+  },
+  "dependencies": {
+    "music-metadata": "^12.5.0"
+  },
+  "devDependencies": {
+    "electron": "^45.3.2",
+    "electron-builder": "^26.18.0",
+    "playwright-core": "^1.65.1"
+  }
+}
